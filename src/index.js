@@ -21,7 +21,7 @@ const posts = [{
     title: 'today is a good day',
     body: 'test',
     published: true,
-    author: '1'
+    author: '1',
 }, {
     id: '2',
     title: 'yesterday is a good day',
@@ -40,18 +40,22 @@ const comments = [{
     commentId: '1',
     text: 'do you believe it?',
     author: '3',
+    post: '1'
 }, {
     commentId: '2',
     text: 'i do not believe it',
-    author: '1'
+    author: '1',
+    post: '2'
 }, {
     commentId: '3',
     text: 'you should be positive',
-    author: '2'
+    author: '2',
+    post: '3'
 }, {
     commentId: '4',
     text: 'trust yourself.',
-    author: '2'
+    author: '2',
+    post: '3'
 }]
 // Type definition (schema)
 const typeDefs = `
@@ -77,12 +81,14 @@ const typeDefs = `
         body: String!
         published: Boolean!
         author: User!
+        comments: [Comment]
     }
 
     type Comment {
         commentId: ID!
         text: String!
         author: User!
+        post: Post!
     }
 
 `
@@ -117,6 +123,11 @@ const resolvers = {
             return users.find((user) => {
                 return user.id === parent.author
             })
+        },
+        comments(parent, args, ctx, info) {
+            return comments.filter((comment) => {
+                return comment.post === parent.id
+            })
         }
     },
     User: {
@@ -135,6 +146,11 @@ const resolvers = {
         author(parent, args, ctx, info) {
             return users.find((user) => {
                 return user.id === parent.author
+            })
+        }, 
+        post(parent, args, ctx, info) {
+            return posts.find((post) => {
+                return post.id === parent.post
             })
         }
     }
