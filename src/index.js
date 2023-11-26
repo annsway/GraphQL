@@ -73,9 +73,28 @@ const typeDefs = `
     }
 
     type Mutation {
-        createUser(name: String!, email: String!, age: Int): User!
-        createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
-        createComment(text: String!, author: ID!, post: ID!): Comment!
+        createUser(data: CreateUserInput!): User!
+        createPost(data: CreatePostInput!): Post!
+        createComment(data: CreateCommentInput!): Comment!
+    }
+
+    input CreateUserInput {
+        name: String!
+        email: String!
+        age: Int
+    }
+
+    input CreatePostInput {
+        title: String!
+        body: String!
+        published: Boolean!
+        author: ID!
+    }
+
+    input CreateCommentInput {
+        text: String!
+        author: ID!
+        post: ID!
     }
 
     type User {
@@ -131,48 +150,41 @@ const resolvers = {
     // Define the Mutation on the server 
     Mutation: {
         createUser(parent, args, ctx, info) {
-            const emailTaken = users.some((user) => user.email === args.email)
+            const emailTaken = users.some((user) => user.email === args.data.email)
             if (emailTaken) {
                 throw new Error('Error: Email is already taken. ')
             }
             const user = {
                 id: uuidv4(),
-                name: args.name, 
-                email: args.email,
-                age: args.age
+                ...args.data
             }
             users.push(user)
             return user
         },
         createPost(parent, args, ctx, info) {
-            const userExists = users.some((user) => user.id === args.author)
+            const userExists = users.some((user) => user.id === args.data.author)
             if (!userExists) {
                 throw new Error('User not found')
             }
             const post = {
                 id: uuidv4(), 
-                title: args.title, 
-                body: args.body, 
-                published: args.published,
-                author: args.author
+                ...args.data
             }
             posts.push(post)
             return post
         }, 
         createComment(parent, args, ctx, info) {
-            const userExists = users.some((user) => user.id === args.author)
+            const userExists = users.some((user) => user.id === args.data.author)
             if (!userExists) {
                 throw new Error("User not found")
             }
-            const postValidated = posts.some((post) => (post.id === args.post && post.published))
+            const postValidated = posts.some((post) => (post.id === args.data.post && post.published))
             if (!postValidated) {
                 throw new Error('Post is not valid.')
             }
             const comment = {
                 commentId: uuidv4(),
-                text: args.text,
-                author: args.author, 
-                post: args.post
+                ...args.data
             }
             comments.push(comment)
             return comment
