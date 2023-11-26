@@ -3,7 +3,7 @@ import { GraphQLServer } from "graphql-yoga";
 /**
  * Key Points: 
  * 1) There must be schema 
- * 2) You can query scalar types directly 
+ * 2) You can query scalar types directly (String, Boolean, Int, Float, ID)
  * 3) For non-scalar types, you have to set up resolver function 
  */
 
