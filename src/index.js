@@ -37,16 +37,16 @@ const posts = [{
 }]
 
 const comments = [{
-    id: '1',
+    commentId: '1',
     text: 'do you believe it?'
 }, {
-    id: '2',
+    commentId: '2',
     text: 'i do not believe it'
 }, {
-    id: '3',
+    commentId: '3',
     text: 'you should be positive'
 }, {
-    id: '4',
+    commentId: '4',
     text: 'trust yourself.'
 }]
 // Type definition (schema)
@@ -54,6 +54,7 @@ const typeDefs = `
     type Query {
         users(query: String): [User!]!
         posts(query: String): [Post!]!
+        comments: [Comment!]!
         post: Post!
     }
 
@@ -74,7 +75,7 @@ const typeDefs = `
     }
 
     type Comment {
-        id: ID!
+        commentId: ID!
         text: String!
     }
 
@@ -98,6 +99,9 @@ const resolvers = {
             return posts.filter((post) => {
                 return post.title.toLowerCase().includes(args.query.toLowerCase())
             })
+        }, 
+        comments(parent, args, ctx, info) {
+            return comments
         }
     },
     // objects
@@ -114,7 +118,14 @@ const resolvers = {
                 return post.author === parent.id
             })
         }
-    }
+    },
+    // Comment: {
+    //     comments(parent, args, ctx, info) {
+    //         return posts.filter((post) => {
+    //             return post.id === parent.postId
+    //         })
+    //     }
+    // }
 }
 
 const server = new GraphQLServer({
