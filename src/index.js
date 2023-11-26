@@ -38,16 +38,20 @@ const posts = [{
 
 const comments = [{
     commentId: '1',
-    text: 'do you believe it?'
+    text: 'do you believe it?',
+    author: '3',
 }, {
     commentId: '2',
-    text: 'i do not believe it'
+    text: 'i do not believe it',
+    author: '1'
 }, {
     commentId: '3',
-    text: 'you should be positive'
+    text: 'you should be positive',
+    author: '2'
 }, {
     commentId: '4',
-    text: 'trust yourself.'
+    text: 'trust yourself.',
+    author: '2'
 }]
 // Type definition (schema)
 const typeDefs = `
@@ -64,6 +68,7 @@ const typeDefs = `
         email: String! 
         age: Int
         posts: [Post!]!
+        comments: [Comment]
     }
 
     type Post {
@@ -77,6 +82,7 @@ const typeDefs = `
     type Comment {
         commentId: ID!
         text: String!
+        author: User!
     }
 
 `
@@ -104,7 +110,8 @@ const resolvers = {
             return comments
         }
     },
-    // objects
+    // For non-scalar field, we have to set up resolver function 
+    // objects outside Query
     Post: {
         author(parent, args, ctx, info) {
             return users.find((user) => {
@@ -117,15 +124,20 @@ const resolvers = {
             return posts.filter((post) => {
                 return post.author === parent.id
             })
+        },
+        comments(parent, args, ctx, info) {
+            return comments.filter((comment) => {
+                return comment.author === parent.id
+            })
         }
     },
-    // Comment: {
-    //     comments(parent, args, ctx, info) {
-    //         return posts.filter((post) => {
-    //             return post.id === parent.postId
-    //         })
-    //     }
-    // }
+    Comment: {
+        author(parent, args, ctx, info) {
+            return users.find((user) => {
+                return user.id === parent.author
+            })
+        }
+    }
 }
 
 const server = new GraphQLServer({
