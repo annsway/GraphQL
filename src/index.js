@@ -6,7 +6,7 @@ import uuidv4 from "uuid";
  * 1. Mutation: allows you to update/delete data on the server, e.g. sign up form
  * 2. Client to define the mutation schema; server to define the mutation resolver 
  */
-const users = [{
+let users = [{
     id: '1',
     name: "Ann",
     email: "a@example.com",
@@ -22,7 +22,7 @@ const users = [{
     email: "c@example.com",
     age: 9,
 }]
-const posts = [{
+let posts = [{
     id: '1',
     title: 'today is a good day',
     body: 'test',
@@ -42,7 +42,7 @@ const posts = [{
     author: '2'
 }]
 
-const comments = [{
+let comments = [{
     commentId: '1',
     text: 'do you believe it?',
     author: '3',
@@ -74,6 +74,7 @@ const typeDefs = `
 
     type Mutation {
         createUser(data: CreateUserInput!): User!
+        deleteUser(id: ID!): User!
         createPost(data: CreatePostInput!): Post!
         createComment(data: CreateCommentInput!): Comment!
     }
@@ -160,6 +161,25 @@ const resolvers = {
             }
             users.push(user)
             return user
+        },
+        deleteUser(parent, args, ctx, info) {
+            const userIndex = users.findIndex(user => user.id === args.id)
+            if (userIndex === -1) {
+                throw new Error("User not found")
+            }
+            const deletedUsers = users.splice(userIndex, 1)
+            // remove all the posts of the user
+            posts = posts.filter((post) => {
+                const match = post.author === args.id
+                if (match) {
+                    // delete all the associated comments with the given post 
+                    comments = comments.filter((comment) => comment.post !== post.id)
+                }
+                return !match
+            })
+            // remove all the comments of the user
+            comments = comments.filter((comment) => comment.author !== args.id)
+            return deletedUsers[0]
         },
         createPost(parent, args, ctx, info) {
             const userExists = users.some((user) => user.id === args.data.author)
